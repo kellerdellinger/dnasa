@@ -71,10 +71,10 @@ def can_create_complete_graph(tiles):
 
 def pot_expansions(pot, graph_order):
 	if not (len(pot) < graph_order):
-		return pot
+		return [pot]
 	else:
 		pot_expansions = []
-		partitions = [integer_partition_generator(graph_order, len(pot))]
+		partitions = list(integer_partition_generator(graph_order, len(pot)))
 		for partition in partitions:
 			for partition_permutation in sympy.utilities.iterables.multiset_permutations(partition):
 				expansion = []
@@ -83,10 +83,6 @@ def pot_expansions(pot, graph_order):
 						expansion.append(pot[i])
 				pot_expansions.append(expansion)
 		return pot_expansions
-
-				
-				
-		
 
 def can_create_smaller_graph(pot_expansion):
 	for i in range(1, len(pot_expansion)):
@@ -131,7 +127,7 @@ of summands in the resultant partitions may be arbitrarily limited using the
 max_summands argument. The resultant generator generates lists of length
 max_summands, wherein each entry refers to a summand in the partition. The
 argument max_summands must be a postive integer less than or equal to n.'''
-def integer_partition_generator(n,max_summands=None):
+def integer_partition_generator(n, max_summands=None):
 	assert type(n) is int
 	assert n >= 0
 	if max_summands == None:
@@ -178,7 +174,14 @@ def integer_partition_generator(n,max_summands=None):
 				break
 		if evenly_distributed == True:
 			break
-		
+
+def scenario1(pot, graph):
+	pot_expansions_ = pot_expansions(pot, graph.order())
+	for pot_expansion in pot_expansions_:
+		if can_create_target(pot_expansion, graph):
+			return True
+	return False
+
 def scenario2(pot, graph, scenario3=False):
 	pot_expansions_ = pot_expansions(pot, graph.order())
 	if not scenario3:
@@ -208,12 +211,12 @@ def scenario2(pot, graph, scenario3=False):
 			return (False, None)
 
 def scenario3(pot, graph):
-	s2result = scenario2(pot, graph)
+	s2result = scenario2(pot, graph, scenario3=True)
 	if s2result[0] == False:
 		return False
 	else:
 		pot_expansions = s2result[1]
 		for pot_expansion in pot_expansions:
-			if creates_nonisomorphisms(pot_expansion):
+			if creates_nonisomorphisms(pot_expansion, graph):
 				return False
 		return True
